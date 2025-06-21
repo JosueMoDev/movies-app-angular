@@ -1,1 +1,8 @@
-<h1 class="text-3xl text-red-950">hellow world hllllll</h1>
+<sidebar-componet />
+<div
+  class="transition-all duration-300"
+  [ngClass]="{ 'ml-80': drawerState, 'ml-0': !drawerState }"
+>
+  <navbar-component />
+  <router-outlet />
+</div>
