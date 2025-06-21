@@ -1,8 +1,14 @@
-<p-menubar [model]="items()">
-  <ng-template pTemplate="start">
-    <button pButton icon="pi pi-bars"></button>
-  </ng-template>
-  <ng-template pTemplate="end">
-    <span class="font-bold">Mi Aplicación</span>
-  </ng-template>
-</p-menubar>
+<div class="w-full px-4 py-5">
+  <div class="relative w-full">
+    <span
+      class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+    >
+      <i class="pi pi-search"></i>
+    </span>
+    <input
+      type="text"
+      placeholder="Movies, series, shows..."
+      class="w-full pl-12 pr-4 py-4 bg-opacity-90 text-white rounded-md focus:outline-none"
+    />
+  </div>
+</div>

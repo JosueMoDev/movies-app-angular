@@ -1,8 +1,9 @@
 import { Component } from "@angular/core";
+import { Layout } from "../components/layout/layout";
 
 @Component({
   selector: "app-movies-list",
-  imports: [],
+  imports: [Layout],
   templateUrl: "./movies-list.html",
   styleUrl: "./movies-list.css",
 })
