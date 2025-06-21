@@ -22,7 +22,7 @@ export class Layout {
     this.movies.set(movies);
   }
   first = 0;
-  rows = 6;
+  rows = 18;
   totalRecords = 0;
 
   onPageChange(event: any) {

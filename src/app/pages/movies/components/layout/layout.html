@@ -1,35 +1,27 @@
 <div class="card">
   <p-dataview
-    #dv
+    layout="grid"
     [value]="movies()"
     [paginator]="!!movies().length"
     [rows]="rows"
     [totalRecords]="totalRecords"
-    [first]="first"
     (onPage)="onPageChange($event)"
     emptyMessage=" "
   >
     <ng-template #grid let-items>
-      <div class="grid grid-cols-12 gap-4">
+      <div
+        class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-10 justify-items-center"
+      >
         @for (movie of items; track $index) {
         <movie [movie]="movie" />
-        }@empty { @for ( i of counterArray(8); track $index) {
+        } @empty { @for (i of counterArray(16); track $index) {
         <skeleton />
         } }
       </div>
     </ng-template>
   </p-dataview>
 </div>
-<div
-  class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-10 justify-items-center"
->
-  @for (movie of movies(); track $index) {
-  <movie [movie]="movie" />
-  } @empty { @for (i of counterArray(16); track $index) {
-  <skeleton />
-  } }
-</div>
 
-@if(!movies()){
+@if (!movies()) {
 <h1>NO DATA !!</h1>
 }
