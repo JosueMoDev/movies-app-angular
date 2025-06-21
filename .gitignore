@@ -1,0 +1,52 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+
+# Angular specific
+.angular
+.angular/cache
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+*.sublime*
+*.code-workspace
+.vscode/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Testing
+/coverage
+/karma-results
+/test-output
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files
+src/environments/*.ts
+!src/environments/environment.ts
+
+# Compiled Typescript
+*.js
+*.js.map
+
+# Logs
+*.log
+
+# Misc
+.sass-cache/
+.cache/
+.eslintcache
