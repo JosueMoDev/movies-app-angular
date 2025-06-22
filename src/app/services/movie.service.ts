@@ -10,7 +10,9 @@ import { Observable, of, forkJoin, lastValueFrom } from "rxjs";
 import { tap, map } from "rxjs/operators";
 import { devEnv } from "@env/env.dev";
 import {
+  FetchMovie,
   FetchPerson,
+  MovieQueryDetail,
   MovieResult,
   TMDBMoviesResponse,
 } from "@app/interfaces/tmdb-movies-response";
@@ -243,6 +245,10 @@ export class MovieService {
           return of(movie);
         }
 
+        const details$ = this.http.get<MovieQueryDetail>(
+          `${devEnv.apiUrl}/movie/${id}`
+        );
+
         const credits$ = this.http
           .get<{ cast: FetchPerson[] }>(`${devEnv.apiUrl}/movie/${id}/credits`)
           .pipe(map((res) => res.cast.filter((p) => !!p.profile_path)));
@@ -262,14 +268,21 @@ export class MovieService {
             )
           );
 
-        return forkJoin({ credits: credits$, similar: similar$ }).pipe(
-          map(({ credits, similar }) => {
+        return forkJoin({
+          credits: credits$,
+          similar: similar$,
+          details: details$,
+        }).pipe(
+          map(({ credits, similar, details }) => {
             const updatedMovie: MovieDetail = {
               ...movie,
               cast: credits.map(MovieModel.fromTheMovieDBPersonToCast),
               related: similar.map(MovieModel.fromTheMovieDBToMovieRelated),
               hasDetails: true,
               isFavorite: movie.isFavorite,
+              genres: details.genres,
+              votage: details.vote_count,
+              budget: details.budget,
             };
 
             const updatedMovies = [...movies];

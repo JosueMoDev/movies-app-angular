@@ -17,4 +17,5 @@ export interface MovieDetail extends Movie {
   budget?: number;
   cast?: Person[];
   related?: Movie[];
+  votage?: number;
 }

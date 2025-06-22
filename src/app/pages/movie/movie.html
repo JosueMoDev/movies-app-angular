@@ -52,6 +52,28 @@
             [ngClass]="movie()?.isFavorite ? 'pi pi-heart-fill' : 'pi pi-heart'"
           ></i>
         </p-button>
+        <div class="flex items-center gap-1 px-4">
+          <i class="text-yellow-400 pi pi-star-fill"></i>
+          <span>{{ movie()?.votage }} votos </span>
+        </div>
+      </div>
+      <div class="flex-1 py-5">
+        <p class="text-3xl font-semibold">Géneros</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          @for (genre of movie()?.genres; track $index) {
+          <span
+            class="px-3 py-1 text-sm font-medium border rounded-full bg-blue-50 text-blue-950"
+          >
+            {{ genre.name }}
+          </span>
+          }
+        </div>
+      </div>
+      <div class="flex-1 py-5">
+        <p class="text-3xl font-semibold">Presupuesto</p>
+        <p class="text-lg font-semibold tracking-wide">
+          {{ movie()?.budget | currency: '$' }}
+        </p>
       </div>
     </div>
 
