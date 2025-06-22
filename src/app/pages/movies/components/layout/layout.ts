@@ -25,6 +25,7 @@ export class Layout {
   constructor() {
     effect(() => {
       const all = this.movieService.allCachedMovies();
+      console.log(all);
       this.movies.set(all);
       this.totalRecords.set(all.length);
     });

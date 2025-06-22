@@ -16,30 +16,28 @@ import { MovieModel } from "@app/models/movie";
 @Injectable({ providedIn: "root" })
 export class MovieService {
   private http = inject(HttpClient);
-
-  // Signal que representa el cache de páginas
   private cacheSignal: WritableSignal<Map<number, Movie[]>> = signal(new Map());
-
-  // Signal computada: arreglo plano de todas las películas cacheadas
   readonly allCachedMovies = computed(() => {
     const map = this.cacheSignal();
     const all: Movie[] = [];
-    for (const movies of map.values()) {
-      all.push(...movies);
+    const sortedKeys = Array.from(map.keys()).sort((a, b) => a - b);
+    for (const key of sortedKeys) {
+      all.push(...(map.get(key) ?? []));
     }
     return all;
   });
-
   private hasPrefetched = false;
-
   constructor() {
-    this.prefetchInitialPages(5);
+    this.prefetchPagesNextPages(5, 1).subscribe(() => {
+      this.hasPrefetched = true;
+    });
   }
 
-  private prefetchInitialPages(count: number) {
-    if (this.hasPrefetched) return;
-
-    const requests = Array.from({ length: count }, (_, i) => i + 1).map(
+  private prefetchPagesNextPages(
+    count: number,
+    fromPage = 1
+  ): Observable<void> {
+    const requests = Array.from({ length: count }, (_, i) => fromPage + i).map(
       (page) =>
         this.http
           .get<TMDBMoviesResponse>(`${devEnv.apiUrl}/movie/popular`, {
@@ -52,7 +50,7 @@ export class MovieService {
               );
 
               this.cacheSignal.update((cache) => {
-                const newCache = new Map(cache); // ❗ Importante: nueva referencia
+                const newCache = new Map(cache);
                 newCache.set(page, movies);
                 return newCache;
               });
@@ -60,10 +58,7 @@ export class MovieService {
           )
     );
 
-    forkJoin(requests).subscribe(() => {
-      this.hasPrefetched = true;
-      console.log("✅ Prefetch de las primeras 5 páginas listo");
-    });
+    return forkJoin(requests).pipe(map(() => void 0));
   }
 
   getMoviesByPage(page: number): Observable<Movie[]> {
@@ -72,15 +67,33 @@ export class MovieService {
       return of(cached);
     }
 
+    const cachedPages = Array.from(this.cacheSignal().keys());
+    const lastCachedPage =
+      cachedPages.length > 0 ? Math.max(...cachedPages) : 0;
+
+    if (page === lastCachedPage) {
+      return this.prefetchPagesNextPages(page, page + 1).pipe(
+        map(() => {
+          const nowCached = this.cacheSignal().get(page);
+          if (!nowCached)
+            throw new Error(
+              `Página ${page} no encontrada después del prefetch`
+            );
+          return nowCached;
+        })
+      );
+    }
+
     return this.http
       .get<TMDBMoviesResponse>(`${devEnv.apiUrl}/movie/popular`, {
-        params: { page: page.toString() + 1 },
+        params: { page: page.toString() },
       })
       .pipe(
         tap((response) => {
           const movies = response.results.map((m) =>
             MovieModel.fromTheMovieDBToMovie(m)
           );
+
           this.cacheSignal.update((cache) => {
             const newCache = new Map(cache);
             newCache.set(page, movies);
