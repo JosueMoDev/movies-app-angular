@@ -6,7 +6,7 @@ import {
   WritableSignal,
   computed,
 } from "@angular/core";
-import { Observable, of, forkJoin } from "rxjs";
+import { Observable, of, forkJoin, lastValueFrom } from "rxjs";
 import { tap, map } from "rxjs/operators";
 import { devEnv } from "@env/env.dev";
 import {
@@ -20,12 +20,32 @@ import { MovieModel } from "@app/models/movie";
 @Injectable({ providedIn: "root" })
 export class MovieService {
   private http = inject(HttpClient);
+
   private cacheSignal: WritableSignal<Map<number, MovieDetail[]>> = signal(
     new Map()
   );
   private favoritesSignal: WritableSignal<MovieDetail[]> = signal([]);
+  private searchResultsSignal: WritableSignal<MovieDetail[]> = signal([]);
+  private isSearchingSignal: WritableSignal<boolean> = signal(false);
+  private hasSearchResultsSignal: WritableSignal<boolean> = signal(false);
+  private searchHistorySignal: WritableSignal<string[]> = signal([]);
+  private searchCacheSignal: WritableSignal<Map<string, MovieDetail[]>> =
+    signal(new Map());
+
+  readonly visibleMovies = computed(() => {
+    if (
+      this.hasSearchResultsSignal() &&
+      this.searchResultsSignal().length > 0
+    ) {
+      return this.searchResultsSignal();
+    }
+    return this.allCachedMovies();
+  });
 
   readonly allCachedMovies = computed(() => {
+    if (this.hasSearchResults) {
+      return this.searchResultsSignal();
+    }
     const map = this.cacheSignal();
     const all: MovieDetail[] = [];
     const sortedKeys = Array.from(map.keys()).sort((a, b) => a - b);
@@ -35,12 +55,8 @@ export class MovieService {
     return all;
   });
 
-  private hasPrefetched = false;
-
   constructor() {
-    this.prefetchPagesNextPages(5, 1).subscribe(() => {
-      this.hasPrefetched = true;
-    });
+    this.prefetchPagesNextPages(5, 1).subscribe();
   }
 
   private prefetchPagesNextPages(
@@ -85,10 +101,11 @@ export class MovieService {
       return this.prefetchPagesNextPages(page, page + 1).pipe(
         map(() => {
           const nowCached = this.cacheSignal().get(page);
-          if (!nowCached)
+          if (!nowCached) {
             throw new Error(
               `Página ${page} no encontrada después del prefetch`
             );
+          }
           return nowCached;
         })
       );
@@ -114,10 +131,6 @@ export class MovieService {
           response.results.map((m) => MovieModel.fromTheMovieDBToMovie(m))
         )
       );
-  }
-
-  getCache(): WritableSignal<Map<number, MovieDetail[]>> {
-    return this.cacheSignal;
   }
 
   onFavorite(id: number) {
@@ -163,6 +176,59 @@ export class MovieService {
     return this.favoritesSignal();
   }
 
+  async searchMovie(query: string): Promise<void> {
+    this.isSearchingSignal.set(true);
+
+    const cachedResult = this.searchCacheSignal().get(query);
+    if (cachedResult && cachedResult.length > 0) {
+      this.searchResultsSignal.set(cachedResult);
+      this.hasSearchResultsSignal.set(cachedResult.length > 0);
+      this.isSearchingSignal.set(false);
+      return;
+    }
+
+    try {
+      const response = await lastValueFrom(
+        this.http
+          .get<TMDBMoviesResponse>(`${devEnv.apiUrl}/search/movie`, {
+            params: { query: query },
+          })
+          .pipe(
+            map((res) =>
+              res.results.filter(
+                (m) =>
+                  !!m.release_date &&
+                  !isNaN(new Date(m.release_date).getTime()) &&
+                  !!m.poster_path
+              )
+            )
+          )
+      );
+      const movies = response.map((m) => MovieModel.fromTheMovieDBToMovie(m));
+
+      this.searchCacheSignal.update((prevCache) => {
+        const newCache = new Map(prevCache);
+        newCache.set(query, movies);
+        return newCache;
+      });
+
+      this.searchResultsSignal.set(movies);
+      this.hasSearchResultsSignal.set(movies.length > 0);
+    } catch (error) {
+      this.isSearchingSignal.set(false);
+      console.error("Error en la búsqueda:", error);
+    } finally {
+      this.isSearchingSignal.set(false);
+    }
+  }
+
+  clearSearchResults() {
+    this.searchResultsSignal.set([]);
+    this.isSearchingSignal.set(false);
+    this.hasSearchResultsSignal.set(false);
+    this.searchCacheSignal.set(new Map());
+  }
+
   findMovieById(id: number): Observable<MovieDetail | undefined> {
     const currentCache = this.cacheSignal();
     const newCache = new Map(currentCache);
@@ -196,10 +262,7 @@ export class MovieService {
             )
           );
 
-        return forkJoin({
-          credits: credits$,
-          similar: similar$,
-        }).pipe(
+        return forkJoin({ credits: credits$, similar: similar$ }).pipe(
           map(({ credits, similar }) => {
             const updatedMovie: MovieDetail = {
               ...movie,
@@ -213,6 +276,7 @@ export class MovieService {
             updatedMovies[index] = updatedMovie;
             newCache.set(page, updatedMovies);
             this.cacheSignal.set(newCache);
+
             return updatedMovie;
           })
         );
@@ -220,5 +284,21 @@ export class MovieService {
     }
 
     return of(undefined);
+  }
+
+  get isSearching(): boolean {
+    return this.isSearchingSignal();
+  }
+
+  get hasSearchResults(): boolean {
+    return this.hasSearchResultsSignal();
+  }
+
+  get searchResults(): MovieDetail[] {
+    return this.searchResultsSignal();
+  }
+
+  get searchHistory(): string[] {
+    return this.searchHistorySignal();
   }
 }
