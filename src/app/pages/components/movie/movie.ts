@@ -10,7 +10,6 @@ import { firstValueFrom } from "rxjs";
   selector: "movie",
   imports: [CommonModule, Button],
   templateUrl: "./movie.html",
-  styleUrl: "./movie.css",
 })
 export class MovieComponent {
   movieService = inject(MovieService);

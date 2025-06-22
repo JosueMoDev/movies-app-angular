@@ -4,6 +4,5 @@ import { Component } from "@angular/core";
   selector: "skeleton",
   imports: [],
   templateUrl: "./skeleton.html",
-  styleUrl: "./skeleton.css",
 })
 export class Skeleton {}

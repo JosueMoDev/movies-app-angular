@@ -1,4 +1,4 @@
-<div class="card flex justify-center z-50 transition-transform duration-30">
+<div class="z-50 flex justify-center transition-transform card duration-30">
   <p-drawer [visible]="true" [modal]="false">
     <ng-template #headless>
       <div class="flex flex-col h-full">
@@ -83,56 +83,57 @@
                 fill="var(--ground-background)"
               />
             </svg>
-            <span class="font-semibold text-2xl text-primary">Your Logo</span>
+            <span class="text-2xl font-semibold text-primary">Your Logo</span>
           </span>
         </div>
-        <div class="overflow-y-auto pt-10 pl-3">
-          <ul class="list-none p-0 m-0 overflow-hidden">
+        <div class="pt-10 pl-3 overflow-y-auto">
+          <ul class="p-0 m-0 overflow-hidden list-none">
             <li>
               <a
-                pRipple
-                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple"
+                [routerLink]="['/']"
+                class="flex items-center p-4 transition-colors duration-150 cursor-pointer rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 p-ripple"
               >
-                <i class="pi pi-home mr-2" style="font-size: 1.5rem"></i>
+                <i class="mr-2 pi pi-home" style="font-size: 1.5rem"></i>
                 <span class="text-lg font-semibold">Home</span>
               </a>
             </li>
             <li>
               <a
-                pRipple
-                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple"
+                [routerLink]="['/favorites']"
+                routerLinkActive="router-link-active"
+                class="flex items-center p-4 transition-colors duration-150 cursor-pointer rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 p-ripple"
               >
-                <i class="pi pi-heart mr-2" style="font-size: 1.5rem"></i>
-                <span class="font-semibold text-lg">Favorites</span>
+                <i class="mr-2 pi pi-heart" style="font-size: 1.5rem"></i>
+                <span class="text-lg font-semibold">Favorites</span>
               </a>
             </li>
             <li>
               <a
                 pRipple
-                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple"
+                class="flex items-center p-4 transition-colors duration-150 cursor-pointer rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 p-ripple"
               >
-                <i class="pi pi-calendar mr-2" style="font-size: 1.5rem"></i>
-                <span class="font-semibold text-lg">Comming Soom</span>
+                <i class="mr-2 pi pi-calendar" style="font-size: 1.5rem"></i>
+                <span class="text-lg font-semibold">Comming Soom</span>
               </a>
             </li>
             <li>
               <a
                 pRipple
-                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple"
+                class="flex items-center p-4 transition-colors duration-150 cursor-pointer rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 p-ripple"
               >
-                <i class="pi pi-chart-line mr-2" style="font-size: 1.5rem"></i>
-                <span class="font-semibold text-lg">Trending</span>
+                <i class="mr-2 pi pi-chart-line" style="font-size: 1.5rem"></i>
+                <span class="text-lg font-semibold">Trending</span>
               </a>
             </li>
           </ul>
-          <ul class="list-none pt-20 m-0 overflow-hidden">
+          <ul class="pt-20 m-0 overflow-hidden list-none">
             <li>
               <a
                 pRipple
-                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple"
+                class="flex items-center p-4 transition-colors duration-150 cursor-pointer rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 p-ripple"
               >
-                <i class="pi pi-youtube mr-2" style="font-size: 1.5rem"></i>
-                <span class="font-semibold text-lg">Continue watching</span>
+                <i class="mr-2 pi pi-youtube" style="font-size: 1.5rem"></i>
+                <span class="text-lg font-semibold">Continue watching</span>
               </a>
             </li>
           </ul>

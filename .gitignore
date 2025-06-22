@@ -39,10 +39,6 @@ Thumbs.db
 src/environments/*.ts
 !src/environments/environment.ts
 
-# Compiled Typescript
-*.js
-*.js.map
-
 # Logs
 *.log
 

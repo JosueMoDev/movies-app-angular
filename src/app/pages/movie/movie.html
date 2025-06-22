@@ -39,6 +39,19 @@
         >
           Trailer
         </button>
+        <p-button
+          class="w-10 h-10"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          [styleClass]="'bg-gradient-to-br from-black/95 to-transparent backdrop-blur-sm text-white'"
+          (click)="onFavorite(movie()!.id, $event)"
+        >
+          <i
+            style="font-size: 1.5rem"
+            [ngClass]="movie()?.isFavorite ? 'pi pi-heart-fill' : 'pi pi-heart'"
+          ></i>
+        </p-button>
       </div>
     </div>
 
@@ -54,6 +67,7 @@
   <div class="relative z-10 py-10">
     <h2 class="justify-center mb-6 ml-12 text-3xl font-bold">Related Movies</h2>
 
+    @if(movie()?.related){
     <p-carousel
       [value]="movie()!.related!"
       [numVisible]="8"
@@ -80,12 +94,13 @@
                 <i class="text-yellow-400 pi pi-star-fill"></i>
                 <span>{{ movie.rating }}</span>
               </div>
-              <span>{{ movie.releaseDate | date: 'mediumDate' }}</span>
+              <span>{{ movie!.releaseDate | date: 'mediumDate' }}</span>
             </div>
           </div>
         </div>
       </ng-template>
     </p-carousel>
+    }
   </div>
 
   <div class="relative z-10 py-10">

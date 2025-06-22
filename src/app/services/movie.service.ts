@@ -24,6 +24,7 @@ export class MovieService {
     new Map()
   );
   private favoritesSignal: WritableSignal<MovieDetail[]> = signal([]);
+
   readonly allCachedMovies = computed(() => {
     const map = this.cacheSignal();
     const all: MovieDetail[] = [];
@@ -33,7 +34,9 @@ export class MovieService {
     }
     return all;
   });
+
   private hasPrefetched = false;
+
   constructor() {
     this.prefetchPagesNextPages(5, 1).subscribe(() => {
       this.hasPrefetched = true;
@@ -144,11 +147,11 @@ export class MovieService {
         const exists = favorites.some((m) => m.id === updatedMovie!.id);
 
         if (updatedMovie!.isFavorite && !exists) {
-          return [...favorites, updatedMovie!]; // agregar
+          return [...favorites, updatedMovie!];
         }
 
         if (!updatedMovie!.isFavorite && exists) {
-          return favorites.filter((m) => m.id !== updatedMovie!.id); // quitar
+          return favorites.filter((m) => m.id !== updatedMovie!.id);
         }
 
         return favorites;
@@ -159,6 +162,7 @@ export class MovieService {
   getFavorites(): MovieDetail[] {
     return this.favoritesSignal();
   }
+
   findMovieById(id: number): Observable<MovieDetail | undefined> {
     const currentCache = this.cacheSignal();
     const newCache = new Map(currentCache);
@@ -173,24 +177,38 @@ export class MovieService {
           return of(movie);
         }
 
-        return forkJoin({
-          credits: this.http.get<{ cast: FetchPerson[] }>(
-            `${devEnv.apiUrl}/movie/${id}/credits`
-          ),
-          similar: this.http.get<{ results: MovieResult[] }>(
+        const credits$ = this.http
+          .get<{ cast: FetchPerson[] }>(`${devEnv.apiUrl}/movie/${id}/credits`)
+          .pipe(map((res) => res.cast.filter((p) => !!p.profile_path)));
+
+        const similar$ = this.http
+          .get<{ results: MovieResult[] }>(
             `${devEnv.apiUrl}/movie/${id}/similar`
-          ),
+          )
+          .pipe(
+            map((res) =>
+              res.results.filter(
+                (m) =>
+                  !!m.release_date &&
+                  !isNaN(new Date(m.release_date).getTime()) &&
+                  !!m.poster_path
+              )
+            )
+          );
+
+        return forkJoin({
+          credits: credits$,
+          similar: similar$,
         }).pipe(
           map(({ credits, similar }) => {
             const updatedMovie: MovieDetail = {
               ...movie,
-              cast: credits.cast.map(MovieModel.fromTheMovieDBPersonToCast),
-              related: similar.results.map(
-                MovieModel.fromTheMovieDBToMovieRelated
-              ),
+              cast: credits.map(MovieModel.fromTheMovieDBPersonToCast),
+              related: similar.map(MovieModel.fromTheMovieDBToMovieRelated),
               hasDetails: true,
               isFavorite: movie.isFavorite,
             };
+
             const updatedMovies = [...movies];
             updatedMovies[index] = updatedMovie;
             newCache.set(page, updatedMovies);

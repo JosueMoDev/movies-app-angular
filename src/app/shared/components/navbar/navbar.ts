@@ -6,6 +6,5 @@ import { Menubar } from "primeng/menubar";
   selector: "navbar-component",
   imports: [],
   templateUrl: "./navbar.html",
-  styleUrl: "./navbar.css",
 })
 export class Navbar {}
