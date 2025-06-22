@@ -5,11 +5,10 @@ import { MovieDetail } from "@app/interfaces/movies";
 import { MovieService } from "@app/services/movie.service";
 import { Button } from "primeng/button";
 import { CarouselModule } from "primeng/carousel";
-import { Tag } from "primeng/tag";
 
 @Component({
   selector: "app-movie",
-  imports: [CommonModule, CarouselModule, Tag, Button, RouterLink],
+  imports: [CommonModule, CarouselModule, Button, RouterLink],
   templateUrl: "./movie.html",
 })
 export default class Movie {

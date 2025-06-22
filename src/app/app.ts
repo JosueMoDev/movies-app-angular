@@ -11,5 +11,5 @@ import { CommonModule } from "@angular/common";
   styleUrl: "./app.css",
 })
 export class App {
-  protected title = "MOVIES-APP-ANGULAR";
+  protected title = "Movies";
 }
