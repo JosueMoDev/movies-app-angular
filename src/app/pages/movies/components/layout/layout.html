@@ -2,15 +2,15 @@
   <p-dataview
     layout="grid"
     [value]="movies()"
-    [paginator]="!!movies().length"
-    [rows]="rows"
-    [totalRecords]="totalRecords"
+    [paginator]="true"
+    [rows]="20"
+    [totalRecords]="totalRecords()"
     (onPage)="onPageChange($event)"
     emptyMessage=" "
   >
     <ng-template #grid let-items>
       <div
-        class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-10 justify-items-center"
+        class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-2 gap-y-10 justify-items-center"
       >
         @for (movie of items; track $index) {
         <movie [movie]="movie" />

@@ -1,32 +1,39 @@
+import { Component, inject, signal, effect, computed } from "@angular/core";
+import { MovieService } from "@app/services/movie.service";
+import { Movie } from "@app/interfaces/movies";
 import { CommonModule } from "@angular/common";
-import { Component, inject, signal } from "@angular/core";
 import { ButtonModule } from "primeng/button";
 import { DataView } from "primeng/dataview";
-import { Movie } from "../movie/movie";
+import { MovieComponent } from "../movie/movie";
 import { Skeleton } from "../skeleton/skeleton";
-import { MovieService } from "../../services/movie";
 
 @Component({
   selector: "layout",
-  imports: [DataView, ButtonModule, CommonModule, Movie, Skeleton],
+  standalone: true,
+  imports: [CommonModule, ButtonModule, DataView, MovieComponent, Skeleton],
   templateUrl: "./layout.html",
   styleUrl: "./layout.css",
 })
 export class Layout {
-  movieService: MovieService = inject(MovieService);
-  movies = signal<any>([]);
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    const movies = this.movieService.getAllMovies();
-    this.movies.set(movies);
+  movieService = inject(MovieService);
+
+  movies = signal<Movie[]>([]);
+  currentPage = 1;
+  rows = 20;
+  totalRecords = signal(0);
+
+  constructor() {
+    effect(() => {
+      const all = this.movieService.allCachedMovies();
+      this.movies.set(all);
+      this.totalRecords.set(all.length);
+    });
   }
-  first = 0;
-  rows = 18;
-  totalRecords = 0;
 
   onPageChange(event: any) {
-    this.first = event.first;
+    const { first, rows } = event;
+    this.currentPage = Math.floor(first / rows) + 1;
+    this.movieService.getMoviesByPage(this.currentPage).subscribe();
   }
 
   counterArray(n: number): any[] {

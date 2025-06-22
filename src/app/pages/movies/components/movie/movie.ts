@@ -1,5 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, input } from "@angular/core";
+import type { Movie } from "@app/interfaces/movies";
 import { Button } from "primeng/button";
 
 @Component({
@@ -8,11 +9,6 @@ import { Button } from "primeng/button";
   templateUrl: "./movie.html",
   styleUrl: "./movie.css",
 })
-export class Movie {
-  movie: any = input<any>(undefined);
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    console.log(this.movie());
-  }
+export class MovieComponent {
+  movie = input.required<Movie>();
 }
