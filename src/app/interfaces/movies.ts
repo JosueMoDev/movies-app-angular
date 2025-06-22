@@ -1,3 +1,4 @@
+import { Person } from "./movie-details";
 export interface Movie {
   id: number;
   title: string;
@@ -6,12 +7,14 @@ export interface Movie {
   rating: number;
   poster: string;
   backdrop: string;
+  isFavorite: boolean;
+  hasDetails: boolean;
 }
 
-export interface CompleteMovie extends Movie {
-  genres: string[];
-  duration: number;
-  budget: number;
-  originalTitle: string;
-  productionCompanies: string[];
+export interface MovieDetail extends Movie {
+  genres?: { id: number; name: string }[];
+  duration?: number;
+  budget?: number;
+  cast?: Person[];
+  related?: Movie[];
 }

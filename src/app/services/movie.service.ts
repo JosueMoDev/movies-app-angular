@@ -9,17 +9,24 @@ import {
 import { Observable, of, forkJoin } from "rxjs";
 import { tap, map } from "rxjs/operators";
 import { devEnv } from "@env/env.dev";
-import { TMDBMoviesResponse } from "@app/interfaces/tmdb-movies-response";
-import { Movie } from "@app/interfaces/movies";
+import {
+  FetchPerson,
+  MovieResult,
+  TMDBMoviesResponse,
+} from "@app/interfaces/tmdb-movies-response";
+import { MovieDetail } from "@app/interfaces/movies";
 import { MovieModel } from "@app/models/movie";
 
 @Injectable({ providedIn: "root" })
 export class MovieService {
   private http = inject(HttpClient);
-  private cacheSignal: WritableSignal<Map<number, Movie[]>> = signal(new Map());
+  private cacheSignal: WritableSignal<Map<number, MovieDetail[]>> = signal(
+    new Map()
+  );
+  private favoritesSignal: WritableSignal<MovieDetail[]> = signal([]);
   readonly allCachedMovies = computed(() => {
     const map = this.cacheSignal();
-    const all: Movie[] = [];
+    const all: MovieDetail[] = [];
     const sortedKeys = Array.from(map.keys()).sort((a, b) => a - b);
     for (const key of sortedKeys) {
       all.push(...(map.get(key) ?? []));
@@ -61,7 +68,7 @@ export class MovieService {
     return forkJoin(requests).pipe(map(() => void 0));
   }
 
-  getMoviesByPage(page: number): Observable<Movie[]> {
+  getMoviesByPage(page: number): Observable<MovieDetail[]> {
     const cached = this.cacheSignal().get(page + 1);
     if (cached) {
       return of(cached);
@@ -106,7 +113,94 @@ export class MovieService {
       );
   }
 
-  getCache(): WritableSignal<Map<number, Movie[]>> {
+  getCache(): WritableSignal<Map<number, MovieDetail[]>> {
     return this.cacheSignal;
+  }
+
+  onFavorite(id: number) {
+    let updatedMovie: MovieDetail | null = null;
+
+    this.cacheSignal.update((cache) => {
+      const newCache = new Map<number, MovieDetail[]>();
+
+      for (const [page, movies] of cache.entries()) {
+        const updatedMovies = movies.map((movie) => {
+          if (movie.id === id) {
+            const newMovie = { ...movie, isFavorite: !movie.isFavorite };
+            updatedMovie = newMovie;
+            return newMovie;
+          }
+          return movie;
+        });
+
+        newCache.set(page, updatedMovies);
+      }
+
+      return newCache;
+    });
+
+    if (updatedMovie) {
+      this.favoritesSignal.update((favorites) => {
+        const exists = favorites.some((m) => m.id === updatedMovie!.id);
+
+        if (updatedMovie!.isFavorite && !exists) {
+          return [...favorites, updatedMovie!]; // agregar
+        }
+
+        if (!updatedMovie!.isFavorite && exists) {
+          return favorites.filter((m) => m.id !== updatedMovie!.id); // quitar
+        }
+
+        return favorites;
+      });
+    }
+  }
+
+  getFavorites(): MovieDetail[] {
+    return this.favoritesSignal();
+  }
+  findMovieById(id: number): Observable<MovieDetail | undefined> {
+    const currentCache = this.cacheSignal();
+    const newCache = new Map(currentCache);
+
+    for (const [page, movies] of newCache.entries()) {
+      const index = movies.findIndex((m) => m.id === id);
+
+      if (index !== -1) {
+        const movie = movies[index];
+
+        if (movie.hasDetails) {
+          return of(movie);
+        }
+
+        return forkJoin({
+          credits: this.http.get<{ cast: FetchPerson[] }>(
+            `${devEnv.apiUrl}/movie/${id}/credits`
+          ),
+          similar: this.http.get<{ results: MovieResult[] }>(
+            `${devEnv.apiUrl}/movie/${id}/similar`
+          ),
+        }).pipe(
+          map(({ credits, similar }) => {
+            const updatedMovie: MovieDetail = {
+              ...movie,
+              cast: credits.cast.map(MovieModel.fromTheMovieDBPersonToCast),
+              related: similar.results.map(
+                MovieModel.fromTheMovieDBToMovieRelated
+              ),
+              hasDetails: true,
+              isFavorite: movie.isFavorite,
+            };
+            const updatedMovies = [...movies];
+            updatedMovies[index] = updatedMovie;
+            newCache.set(page, updatedMovies);
+            this.cacheSignal.set(newCache);
+            return updatedMovie;
+          })
+        );
+      }
+    }
+
+    return of(undefined);
   }
 }

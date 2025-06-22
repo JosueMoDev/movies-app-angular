@@ -1,7 +1,10 @@
+import { Person } from "./movie-details";
+import { Movie } from "./movies";
+
 export interface TMDBMoviesResponse {
   dates: Dates;
   page: number;
-  results: Result[];
+  results: MovieResult[];
   total_pages: number;
   total_results: number;
 }
@@ -11,7 +14,7 @@ export interface Dates {
   minimum: Date;
 }
 
-export interface Result {
+export interface MovieResult {
   adult: boolean;
   backdrop_path: string;
   genre_ids: number[];
@@ -28,6 +31,32 @@ export interface Result {
   vote_count: number;
 }
 
+export interface FetchMovie extends MovieResult {
+  genres?: Genre[];
+  runtime?: number;
+  budget?: number;
+  cast?: FetchPerson[];
+  related?: FetchMovie[];
+}
+
+export interface FetchPerson {
+  adult: boolean;
+  gender: number;
+  id: number;
+  known_for_department: string;
+  name: string;
+  original_name: string;
+  popularity: number;
+  profile_path: string;
+  cast_id: number;
+  character: string;
+  credit_id: string;
+  order: number;
+}
+interface Genre {
+  id: number;
+  name: string;
+}
 export enum OriginalLanguage {
   CN = "cn",
   En = "en",

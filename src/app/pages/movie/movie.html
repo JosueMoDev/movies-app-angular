@@ -1,0 +1,121 @@
+@if(!!movie()){
+<div
+  class="relative min-h-screen text-white"
+  [ngStyle]="{ 'background-image': 'url(' + movie()!.backdrop + ')' }"
+  style="background-size: cover; background-position: center"
+>
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+  <div
+    class="relative z-10 flex flex-col items-start justify-between px-10 py-16 space-y-6 md:flex-row md:items-center md:space-y-0"
+  >
+    <div class="absolute z-10 top-1 left-1">
+      <p-button
+        icon="pi pi-arrow-left"
+        label="Volver"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        [routerLink]="'/'"
+        [styleClass]="'bg-gradient-to-br from-black/95 to-transparent backdrop-blur-sm text-white px-3 py-2'"
+      ></p-button>
+    </div>
+
+    <div class="max-w-2xl">
+      <p class="text-sm tracking-wide uppercase">
+        {{ movie()!.releaseDate | date: 'mediumDate' }}
+      </p>
+      <h1 class="mt-2 text-6xl font-extrabold">{{ movie()!.title }}</h1>
+      <p class="mt-4 text-lg text-gray-300">{{ movie()!.description }}</p>
+
+      <div class="flex gap-4 mt-6">
+        <button
+          class="px-6 py-2 font-semibold text-black bg-white rounded-full"
+        >
+          Watch now
+        </button>
+        <button
+          class="px-6 py-2 font-semibold border border-white rounded-full"
+        >
+          Trailer
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-lg shadow-lg w-60 h-96">
+      <img
+        [src]="movie()!.poster"
+        [alt]="movie()!.title"
+        class="object-cover w-full h-full"
+      />
+    </div>
+  </div>
+
+  <div class="relative z-10 py-10">
+    <h2 class="justify-center mb-6 ml-12 text-3xl font-bold">Related Movies</h2>
+
+    <p-carousel
+      [value]="movie()!.related!"
+      [numVisible]="8"
+      [numScroll]="4"
+      [circular]="true"
+    >
+      <ng-template let-movie #item>
+        <div
+          class="relative w-64 overflow-hidden cursor-pointer h-96 rounded-xl group"
+        >
+          <img
+            [src]="'https://image.tmdb.org/t/p/original' + movie.poster"
+            [alt]="movie.title"
+            class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+          />
+          <div
+            class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent backdrop-blur-sm"
+          >
+            <h3 class="text-lg font-bold capitalize truncate">
+              {{ movie.title }}
+            </h3>
+            <div class="flex items-center gap-3 mt-1 text-sm">
+              <div class="flex items-center gap-1">
+                <i class="text-yellow-400 pi pi-star-fill"></i>
+                <span>{{ movie.rating }}</span>
+              </div>
+              <span>{{ movie.releaseDate | date: 'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
+
+  <div class="relative z-10 py-10">
+    <h2 class="justify-center mb-6 ml-12 text-3xl font-bold">Elenco</h2>
+    <p-carousel
+      [value]="movie()!.cast!"
+      [numVisible]="8"
+      [numScroll]="4"
+      [circular]="true"
+    >
+      <ng-template let-person #item>
+        <div
+          class="relative w-64 overflow-hidden cursor-pointer h-96 rounded-xl group"
+        >
+          <img
+            [src]="'https://image.tmdb.org/t/p/original' + person.avatar"
+            [alt]="person.name"
+            class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+          />
+          <div
+            class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent backdrop-blur-sm"
+          >
+            <h3 class="text-lg font-bold capitalize truncate">
+              {{ person.name }}
+            </h3>
+            <p class="text-sm italic truncate">"{{ person.character }}"</p>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>
+}
