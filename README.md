@@ -1,59 +1,55 @@
-# MOVIESAPPANGULAR
+# Movie App - Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.2.
+Una aplicación sencilla y moderna para explorar y descubrir películas utilizando la API de TMDB (The Movie Database).
 
-## Development server
+## Funcionalidades
 
-To start a local development server, run:
+- **Explora películas**: Busca y visualiza información sobre tus películas favoritas.
+- **Interfaz interactiva**: Navega a través de una interfaz de usuario elegante construida con Angular y PrimeNG.
+- **Diseño responsivo**: Aprovecha el poder de Tailwind CSS para un diseño adaptativo en cualquier dispositivo.
 
-```bash
-ng serve
-```
+## Tecnologías
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Angular**: Framework frontend para construir aplicaciones de una sola página (SPA).
+- **PrimeNG**: Biblioteca de componentes UI para Angular.
+- **TailwindCSS**: Framework de CSS para un diseño flexible y fácil de personalizar.
+- **TMDB API**: API de The Movie Database para obtener información sobre películas.
 
-## Code scaffolding
+## Creación del Proyecto
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Este proyecto fue creado utilizando `vite create` con el siguiente comando:
 
 ```bash
-ng generate --help
-```
+npm create vite@latest movies-app-angular --template angular
+yarn install
+npm install
 
-## Building
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{html,ts}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-To build the project run:
+yarn add primeng primeicons
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    ButtonModule,
+    CardModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

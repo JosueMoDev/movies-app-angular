@@ -33,7 +33,7 @@ export class Layout {
   isFavoriteList = input.required<boolean>();
   movies = signal<Movie[]>([]);
   currentPage = 1;
-  rows = 10;
+  rows = 20;
   first = 0;
   totalRecords = signal(0);
   isLoading = true;
