@@ -15,41 +15,24 @@ Una aplicación sencilla y moderna para explorar y descubrir películas utilizan
 - **TailwindCSS**: Framework de CSS para un diseño flexible y fácil de personalizar.
 - **TMDB API**: API de The Movie Database para obtener información sobre películas.
 
-## Creación del Proyecto
-
-Este proyecto fue creado utilizando `vite create` con el siguiente comando:
-
+# Crear el proyecto con Vite
 ```bash
 npm create vite@latest movies-app-angular --template angular
-yarn install
+```
+# Instalar dependencias del proyecto
+```bash
 npm install
+```
+# Instalar TailwindCSS
+```bash
+npm install -D tailwindcss postcss autoprefixer
+```
+```bash
+# Inicializar la configuración de TailwindCSS
+npx tailwindcss init
+```
+```bash
+# Instalar PrimeNG y PrimeIcons
+npm install primeng primeicons
+```
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-yarn add primeng primeicons
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    ButtonModule,
-    CardModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
-export class AppModule { }
