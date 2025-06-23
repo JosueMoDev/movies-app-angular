@@ -7,7 +7,7 @@ import {
   computed,
 } from "@angular/core";
 import { Observable, of, forkJoin, lastValueFrom } from "rxjs";
-import { tap, map } from "rxjs/operators";
+import { tap, map, delay } from "rxjs/operators";
 import { devEnv } from "@env/env.dev";
 import {
   FetchPerson,
@@ -23,9 +23,11 @@ import { Router } from "@angular/router";
 export class MovieService {
   private http = inject(HttpClient);
   router = inject(Router);
+
   private cacheSignal: WritableSignal<Map<number, MovieDetail[]>> = signal(
     new Map()
   );
+  private isFirstLoadSignal: WritableSignal<boolean> = signal(true);
   private favoritesSignal: WritableSignal<MovieDetail[]> = signal([]);
   private searchResultsSignal: WritableSignal<MovieDetail[]> = signal([]);
   private isSearchingSignal: WritableSignal<boolean> = signal(false);
@@ -48,6 +50,7 @@ export class MovieService {
     if (this.hasSearchResults) {
       return this.searchResultsSignal();
     }
+
     const map = this.cacheSignal();
     const all: MovieDetail[] = [];
     const sortedKeys = Array.from(map.keys()).sort((a, b) => a - b);
@@ -70,7 +73,9 @@ export class MovieService {
       this.favoritesSignal.set(parsedFavorites);
     }
 
-    this.prefetchPagesNextPages(5, 1).subscribe();
+    this.prefetchPagesNextPages(5, 1).subscribe(() => {
+      this.isFirstLoadSignal.set(false);
+    });
   }
 
   private prefetchPagesNextPages(
@@ -84,11 +89,11 @@ export class MovieService {
             params: { page: page.toString() },
           })
           .pipe(
+            delay(500),
             tap((response) => {
               const movies = response.results.map((m) =>
                 MovieModel.fromTheMovieDBToMovie(m)
               );
-
               this.cacheSignal.update((cache) => {
                 const newCache = new Map(cache);
                 newCache.set(page, movies);
@@ -155,9 +160,11 @@ export class MovieService {
     if (isAlreadyFavorite) {
       newFavorites = currentFavorites.filter((m) => m.id !== id);
     } else {
-      const movie = Array.from(this.cacheSignal().values())
-        .flat()
-        .find((m) => m.id === id);
+      const movie =
+        Array.from(this.cacheSignal().values())
+          .flat()
+          .find((m) => m.id === id) ??
+        this.searchResultsSignal().find((m) => m.id === id);
       if (!movie) return;
 
       newFavorites = [...currentFavorites, { ...movie, isFavorite: true }];
@@ -184,6 +191,12 @@ export class MovieService {
       }
       return newCache;
     });
+
+    this.searchResultsSignal.update((movies) =>
+      movies.map((movie) =>
+        movie.id === id ? { ...movie, isFavorite: !isAlreadyFavorite } : movie
+      )
+    );
   }
 
   getFavorites(): MovieDetail[] {
@@ -219,8 +232,8 @@ export class MovieService {
             )
           )
       );
-      const movies = response.map((m) => MovieModel.fromTheMovieDBToMovie(m));
 
+      const movies = response.map((m) => MovieModel.fromTheMovieDBToMovie(m));
       const favorites = this.favoritesSignal();
 
       const updatedMovies = movies.map((movie) => {
@@ -238,7 +251,6 @@ export class MovieService {
       this.searchResultsSignal.set(updatedMovies);
       this.hasSearchResultsSignal.set(updatedMovies.length > 0);
     } catch (error) {
-      this.isSearchingSignal.set(false);
       console.error("Error en la búsqueda:", error);
     } finally {
       this.isSearchingSignal.set(false);
@@ -267,13 +279,8 @@ export class MovieService {
         }
 
         const favorites = this.favoritesSignal();
-
         const isFavorite = favorites.some((fav) => fav.id === movie.id);
-
-        const updatedMovie: MovieDetail = {
-          ...movie,
-          isFavorite: isFavorite,
-        };
+        const updatedMovie: MovieDetail = { ...movie, isFavorite };
 
         const details$ = this.http.get<MovieQueryDetail>(
           `${devEnv.apiUrl}/movie/${id}`
@@ -324,6 +331,12 @@ export class MovieService {
       }
     }
 
+    // 🔍 Fallback: buscar en resultados de búsqueda si no está en cache
+    const fallback = this.searchResultsSignal().find((m) => m.id === id);
+    if (fallback) {
+      return of(fallback);
+    }
+
     return of(undefined);
   }
 
@@ -341,5 +354,9 @@ export class MovieService {
 
   get searchHistory(): string[] {
     return this.searchHistorySignal();
+  }
+
+  get isFetching(): boolean {
+    return this.isFirstLoadSignal();
   }
 }

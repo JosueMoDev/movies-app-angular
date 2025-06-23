@@ -52,6 +52,7 @@ export class Navbar {
     this.query = "";
     this.queryError = false;
     this.clearDebounce();
+    this.movieService.clearSearchResults();
   }
 
   private clearDebounce() {

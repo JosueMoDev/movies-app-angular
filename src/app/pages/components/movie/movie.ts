@@ -17,6 +17,7 @@ export class MovieComponent {
   router = inject(Router);
 
   onFavorite(id: number, event: MouseEvent) {
+    console.log(id);
     event.stopPropagation();
     this.movieService.onFavorite(id);
   }
